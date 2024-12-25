@@ -16,3 +16,4 @@ Route::group([
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::middleware('auth:api')->get('/user/profile', [AuthController::class, 'profile']);
