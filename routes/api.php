@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FeedbackController;
 
 Route::group([
     'middleware' => 'api',
@@ -17,3 +19,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::middleware('auth:api')->get('/user/profile', [AuthController::class, 'profile']);
+Route::middleware(['auth:api', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return response()->json(['message' => 'Welcome, Admin!']);
+    });
+});
+Route::middleware('auth:api')->get('/user', [UserController::class, 'show']);
+Route::get('/feedbacks', [FeedbackController::class, 'index']);  
+Route::post('/feedbacks', [FeedbackController::class, 'store']); 
