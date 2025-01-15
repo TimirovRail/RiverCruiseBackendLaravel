@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\BookingController;
 
 Route::group([
     'middleware' => 'api',
@@ -27,3 +28,6 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 Route::middleware('auth:api')->get('/user', [UserController::class, 'show']);
 Route::get('/feedbacks', [FeedbackController::class, 'index']);  
 Route::post('/feedbacks', [FeedbackController::class, 'store']); 
+
+Route::post('/bookings', [BookingController::class, 'store']);
+Route::get('/bookings', [BookingController::class, 'index']);
