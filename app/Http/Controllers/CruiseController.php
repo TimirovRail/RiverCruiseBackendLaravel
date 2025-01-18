@@ -12,4 +12,14 @@ class CruiseController extends Controller
         $cruises = Cruise::all();
         return response()->json($cruises);
     }
+    public function show($id)
+    {
+        $cruise = Cruise::find($id);
+
+        if ($cruise) {
+            return response()->json($cruise);
+        }
+
+        return response()->json(['message' => 'Круиз не найден'], 404);
+    }
 }
