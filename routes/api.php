@@ -35,3 +35,5 @@ Route::get('/bookings', [BookingController::class, 'index']);
 
 
 Route::get('/cruises', [CruiseController::class, 'index']);
+Route::get('/cruise/{id}', [CruiseController::class, 'show']);
+
