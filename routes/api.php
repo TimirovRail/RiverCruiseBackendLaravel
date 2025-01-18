@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CruiseController;
 
 Route::group([
     'middleware' => 'api',
@@ -31,3 +32,6 @@ Route::post('/feedbacks', [FeedbackController::class, 'store']);
 
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'index']);
+
+
+Route::get('/cruises', [CruiseController::class, 'index']);
