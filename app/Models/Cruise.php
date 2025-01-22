@@ -9,5 +9,15 @@ class Cruise extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'river', 'total_places', 'available_places', 'cabins', 'start_date', 'end_date', 'price_per_person'];
+    protected $fillable = [
+        'name',
+        'description',
+        'river',
+        'total_places',
+        'cabins',
+        'start_date',
+        'end_date',
+        'price_per_person',
+        'available_places',
+    ];
 }

@@ -27,13 +27,16 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
     });
 });
 Route::middleware('auth:api')->get('/user', [UserController::class, 'show']);
-Route::get('/feedbacks', [FeedbackController::class, 'index']);  
-Route::post('/feedbacks', [FeedbackController::class, 'store']); 
+Route::get('/feedbacks', [FeedbackController::class, 'index']);
+Route::post('/feedbacks', [FeedbackController::class, 'store']);
 
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'index']);
 
 
 Route::get('/cruises', [CruiseController::class, 'index']);
+Route::post('/cruises', [CruiseController::class, 'store']);
 Route::get('/cruise/{id}', [CruiseController::class, 'show']);
+Route::put('/cruise/{id}', [CruiseController::class, 'update']);
+Route::delete('/cruise/{id}', [CruiseController::class, 'destroy']);
 
