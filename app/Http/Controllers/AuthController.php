@@ -43,6 +43,9 @@ class AuthController extends Controller
 
         $user = auth('api')->user();
 
+        // Сохраняем данные о пользователе в сессии
+        session(['user' => $user]);
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
