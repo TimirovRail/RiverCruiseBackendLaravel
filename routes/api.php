@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CruiseController;
+use App\Http\Controllers\ServiceController;
 
 Route::group([
     'middleware' => 'api',
@@ -40,3 +41,8 @@ Route::get('/cruise/{id}', [CruiseController::class, 'show']);
 Route::put('/cruise/{id}', [CruiseController::class, 'update']);
 Route::delete('/cruise/{id}', [CruiseController::class, 'destroy']);
 
+Route::get('/services', [ServiceController::class, 'index']);
+Route::get('/services/{id}', [ServiceController::class, 'show']);
+Route::post('/services', [ServiceController::class, 'store']);
+Route::put('/services/{id}', [ServiceController::class, 'update']);
+Route::delete('/services/{id}', [ServiceController::class, 'destroy']);

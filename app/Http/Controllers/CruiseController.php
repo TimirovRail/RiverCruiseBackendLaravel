@@ -18,6 +18,10 @@ class CruiseController extends Controller
         $cruise = Cruise::find($id);
 
         if ($cruise) {
+            if (is_string($cruise->features)) {
+                $cruise->features = json_decode($cruise->features, true);
+            }
+
             return response()->json($cruise);
         }
 
