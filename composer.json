@@ -6,9 +6,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "illuminate/mail": "*",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "pragmarx/google2fa": "^8.0",
         "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {
