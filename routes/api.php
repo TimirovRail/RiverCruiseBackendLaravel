@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
@@ -7,6 +7,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CruiseController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ProfileController;
 
 Route::group([
     'middleware' => 'api',
@@ -46,3 +47,7 @@ Route::get('/services/{id}', [ServiceController::class, 'show']);
 Route::post('/services', [ServiceController::class, 'store']);
 Route::put('/services/{id}', [ServiceController::class, 'update']);
 Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
+
+Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'auth'], function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+});
