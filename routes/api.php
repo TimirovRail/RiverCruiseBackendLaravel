@@ -50,4 +50,7 @@ Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'auth'], function () {
     Route::get('/profile', [ProfileController::class, 'show']);
+  
+
 });
+Route::get('/all-data', [ProfileController::class, 'allData']);
