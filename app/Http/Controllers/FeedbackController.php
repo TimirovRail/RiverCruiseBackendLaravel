@@ -26,5 +26,25 @@ class FeedbackController extends Controller
         $feedbacks = Feedback::all();
         return response()->json($feedbacks);
     }
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'sometimes|string',
+            'email' => 'sometimes|email',
+            'feedback' => 'sometimes|string',
+            'cruise' => 'sometimes|string',
+        ]);
+
+        $feedback = Feedback::findOrFail($id);
+        $feedback->update($request->all());
+        return response()->json($feedback);
+    }
+
+    public function destroy($id)
+    {
+        $feedback = Feedback::findOrFail($id);
+        $feedback->delete();
+        return response()->json(['message' => 'Отзыв успешно удалён']);
+    }
 }
 

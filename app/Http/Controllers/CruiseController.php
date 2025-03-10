@@ -50,30 +50,27 @@ class CruiseController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
+        $request->validate([
+            'name' => 'sometimes|string',
             'description' => 'sometimes|string',
-            'river' => 'sometimes|string|max:255',
-            'total_places' => 'sometimes|integer|min:1',
-            'cabins' => 'sometimes|integer|min:1',
+            'river' => 'sometimes|string',
+            'total_places' => 'sometimes|integer',
+            'cabins' => 'sometimes|integer',
             'start_date' => 'sometimes|date',
-            'end_date' => 'sometimes|date|after_or_equal:start_date',
-            'price_per_person' => 'sometimes|numeric|min:0',
-            'available_places' => 'sometimes|integer|min:1',
+            'end_date' => 'sometimes|date',
+            'price_per_person' => 'sometimes|numeric',
+            'available_places' => 'sometimes|integer',
         ]);
 
         $cruise = Cruise::findOrFail($id);
-        $cruise->update($validated);
-
-        return response()->json($cruise, 200);
+        $cruise->update($request->all());
+        return response()->json($cruise);
     }
 
     public function destroy($id)
     {
         $cruise = Cruise::findOrFail($id);
         $cruise->delete();
-
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Круиз успешно удалён']);
     }
-
 }
