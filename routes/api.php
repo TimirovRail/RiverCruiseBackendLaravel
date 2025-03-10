@@ -30,7 +30,9 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 });
 Route::middleware('auth:api')->get('/user', [UserController::class, 'show']);
 Route::get('/feedbacks', [FeedbackController::class, 'index']);
+Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 Route::post('/feedbacks', [FeedbackController::class, 'store']);
+Route::delete('/feedbacks/{id}', [FeedbackController::class, 'destroy']);
 
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'index']);
@@ -39,8 +41,8 @@ Route::get('/bookings', [BookingController::class, 'index']);
 Route::get('/cruises', [CruiseController::class, 'index']);
 Route::post('/cruises', [CruiseController::class, 'store']);
 Route::get('/cruise/{id}', [CruiseController::class, 'show']);
-Route::put('/cruise/{id}', [CruiseController::class, 'update']);
-Route::delete('/cruise/{id}', [CruiseController::class, 'destroy']);
+Route::put('/cruises/{id}', [CruiseController::class, 'update']);
+Route::delete('/cruises/{id}', [CruiseController::class, 'destroy']);
 
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
@@ -50,7 +52,7 @@ Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'auth'], function () {
     Route::get('/profile', [ProfileController::class, 'show']);
-  
+
 
 });
 Route::get('/all-data', [ProfileController::class, 'allData']);
