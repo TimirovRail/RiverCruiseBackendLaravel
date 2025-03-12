@@ -43,14 +43,16 @@ class AuthController extends Controller
 
         $user = auth('api')->user();
 
-        // Сохраняем данные о пользователе в сессии
-        session(['user' => $user]);
-
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
             'role' => $user->role,
+            'user' => [ // Возвращаем данные пользователя
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
         ]);
     }
 

@@ -9,9 +9,10 @@ class BookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::all(); 
+        $bookings = Booking::all();
         return response()->json($bookings);
     }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -24,6 +25,7 @@ class BookingController extends Controller
             'extras' => 'nullable|array',
             'extras.*' => 'string|max:255',
             'comment' => 'nullable|string|max:1000',
+            'user_id' => 'nullable|exists:users,id', // Добавляем user_id
         ]);
 
         $booking = Booking::create([
@@ -35,6 +37,7 @@ class BookingController extends Controller
             'cabin_class' => $validatedData['cabinClass'],
             'extras' => json_encode($validatedData['extras']),
             'comment' => $validatedData['comment'],
+            'user_id' => $validatedData['user_id'], // Сохраняем user_id
         ]);
 
         return response()->json(['message' => 'Booking successfully created!', 'data' => $booking], 201);
