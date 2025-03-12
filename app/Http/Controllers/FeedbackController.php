@@ -14,6 +14,7 @@ class FeedbackController extends Controller
             'email' => 'required|email|max:255',
             'feedback' => 'required|string',
             'cruise' => 'required|string',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $feedback = Feedback::create($validated);
