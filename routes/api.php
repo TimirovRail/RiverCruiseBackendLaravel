@@ -8,6 +8,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CruiseController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PhotoController;
+
 
 Route::group([
     'middleware' => 'api',
@@ -52,7 +54,7 @@ Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'auth'], function () {
     Route::get('/profile', [ProfileController::class, 'show']);
-
-
 });
 Route::get('/all-data', [ProfileController::class, 'allData']);
+
+Route::post('/upload-photos', [PhotoController::class, 'store']);
