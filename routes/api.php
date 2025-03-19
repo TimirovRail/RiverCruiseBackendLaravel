@@ -9,6 +9,8 @@ use App\Http\Controllers\CruiseController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\SouvenirController;
+use App\Http\Controllers\Api\CartController;
 
 
 Route::group([
@@ -57,4 +59,16 @@ Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'auth'], function () {
 });
 Route::get('/all-data', [ProfileController::class, 'allData']);
 
+Route::get('/photos', [PhotoController::class, 'index']);
+Route::delete('/photos/{id}', [PhotoController::class, 'destroy']);
 Route::post('/upload-photos', [PhotoController::class, 'store']);
+Route::get('/user/photos/{user_id}', [PhotoController::class, 'getUserPhotos']);
+
+Route::get('/souvenirs', [SouvenirController::class, 'index']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('/cart/add', [CartController::class, 'addToCart']);
+    Route::get('/cart', [CartController::class, 'getCart']);
+    Route::post('/cart/update', [CartController::class, 'updateQuantity']);
+    Route::post('/cart/remove', [CartController::class, 'removeFromCart']);
+});
