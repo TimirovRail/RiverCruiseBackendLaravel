@@ -8,6 +8,28 @@ use App\Models\Photo;
 
 class PhotoController extends Controller
 {
+    public function index()
+    {
+        $photos = Photo::all()->pluck('url'); // Получаем только URL фотографий
+        return response()->json($photos);
+    }
+    public function destroy($id)
+    {
+        // Проверка, что id является числом
+        if (!is_numeric($id)) {
+            return response()->json(['error' => 'Некорректный ID фотографии'], 400);
+        }
+
+        $photo = Photo::find($id);
+
+        if (!$photo) {
+            return response()->json(['error' => 'Фотография не найдена'], 404);
+        }
+
+        $photo->delete();
+
+        return response()->json(['message' => 'Фотография успешно удалена']);
+    }
     public function store(Request $request)
     {
         $userId = $request->input('user_id');
@@ -36,6 +58,17 @@ class PhotoController extends Controller
                     'user_id' => (int) $userId,
                 ];
             }
+        }
+
+        return response()->json(['photos' => $photos]);
+    }
+    public function getUserPhotos($user_id)
+    {
+        // Получаем фотографии пользователя по user_id
+        $photos = Photo::where('user_id', $user_id)->get();
+
+        if ($photos->isEmpty()) {
+            return response()->json(['message' => 'Фотографии не найдены'], 404);
         }
 
         return response()->json(['photos' => $photos]);
