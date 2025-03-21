@@ -10,14 +10,28 @@ class Cruise extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description',
-        'river',
-        'total_places',
-        'cabins',
-        'start_date',
-        'end_date',
-        'price_per_person',
-        'available_places',
+        'name', 'description', 'river', 'cabins', 'price_per_person',
+        'image_path', 'features', 'departure_datetime', 'arrival_datetime', 'status',
     ];
+
+    protected $casts = [
+        'features' => 'array',
+        'departure_datetime' => 'datetime',
+        'arrival_datetime' => 'datetime',
+    ];
+
+    public function schedules()
+    {
+        return $this->hasMany(CruiseSchedule::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasManyThrough(Booking::class, CruiseSchedule::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

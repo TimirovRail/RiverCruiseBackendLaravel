@@ -2,44 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\CruiseSchedule;
 use App\Models\Booking;
+use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    public function index()
-    {
-        $bookings = Booking::all();
-        return response()->json($bookings);
-    }
-
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'cruise' => 'required|string|max:255',
-            'date' => 'required|date',
-            'seats' => 'required|integer|min:1|max:10',
-            'cabinClass' => 'required|string|max:255',
+        $validated = $request->validate([
+            'cruise_schedule_id' => 'required|exists:cruise_schedules,id',
+            'seats' => 'required|integer|min:1',
+            'cabin_class' => 'required',
             'extras' => 'nullable|array',
-            'extras.*' => 'string|max:255',
             'comment' => 'nullable|string|max:1000',
-            'user_id' => 'nullable|exists:users,id', // Добавляем user_id
+            'user_id' => 'required|exists:users,id',
         ]);
+
+        $schedule = CruiseSchedule::findOrFail($validated['cruise_schedule_id']);
+        if ($schedule->available_places < $validated['seats']) {
+            return response()->json(['error' => 'Недостаточно мест'], 400);
+        }
+
+        $cruise = $schedule->cruise;
+        $totalPrice = $cruise->price_per_person * $validated['seats'];
 
         $booking = Booking::create([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
-            'cruise' => $validatedData['cruise'],
-            'date' => $validatedData['date'],
-            'seats' => $validatedData['seats'],
-            'cabin_class' => $validatedData['cabinClass'],
-            'extras' => json_encode($validatedData['extras']),
-            'comment' => $validatedData['comment'],
-            'user_id' => $validatedData['user_id'], // Сохраняем user_id
+            'user_id' => $validated['user_id'],
+            'cruise_schedule_id' => $schedule->id,
+            'seats' => $validated['seats'],
+            'cabin_class' => $validated['cabin_class'],
+            'total_price' => $totalPrice,
+            'extras' => json_encode($validated['extras'] ?? []),
+            'comment' => $validated['comment'],
         ]);
 
-        return response()->json(['message' => 'Booking successfully created!', 'data' => $booking], 201);
+        $schedule->decrement('available_places', $validated['seats']); // Уже есть, но проверим
+
+        return response()->json(['message' => 'Бронь создана', 'booking' => $booking], 201);
+    }
+
+    public function index()
+    {
+        $bookings = Booking::with('cruiseSchedule.cruise')->where('user_id', auth()->id())->get();
+        return response()->json($bookings);
     }
 }
