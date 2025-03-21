@@ -8,9 +8,9 @@ use Illuminate\Http\JsonResponse;
 
 class CruiseController extends Controller
 {
-    public function index(): JsonResponse
+    public function index()
     {
-        $cruises = Cruise::all();
+        $cruises = Cruise::with('schedules')->get();
         return response()->json($cruises);
     }
     public function show($id)
@@ -33,20 +33,30 @@ class CruiseController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'river' => 'required|string|max:255',
-            'total_places' => 'required|integer|min:1',
-            'cabins' => 'required|integer|min:1',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'price_per_person' => 'required|numeric|min:0',
-            'available_places' => 'required|integer|min:1',
+            'cabins' => 'required|integer',
+            'price_per_person' => 'required|numeric',
+            'image_path' => 'nullable|string',
+            'features' => 'nullable|array',
+            'departure_datetime' => 'required|date',
+            'arrival_datetime' => 'required|date|after:departure_datetime',
+            'status' => 'required|in:planned,active,completed,canceled',
         ]);
 
-        try {
-            $cruise = Cruise::create($validated);
-            return response()->json($cruise, 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        $cruise = Cruise::create($validated);
+
+        // Создаём 4-6 рейсов
+        $departure = \Carbon\Carbon::parse($validated['departure_datetime']);
+        for ($i = 0; $i < rand(4, 6); $i++) {
+            $cruise->schedules()->create([
+                'departure_datetime' => $departure->copy()->addDays($i * 7),
+                'arrival_datetime' => $departure->copy()->addDays($i * 7 + 3), // +3 дня для примера
+                'total_places' => 50,
+                'available_places' => 50,
+                'status' => 'planned',
+            ]);
         }
+
+        return response()->json($cruise->load('schedules'), 201);
     }
     public function update(Request $request, $id)
     {
