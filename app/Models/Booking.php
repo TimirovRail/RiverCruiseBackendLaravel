@@ -10,8 +10,13 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'cruise_schedule_id', 'seats', 'cabin_class',
-        'total_price', 'extras', 'comment',
+        'user_id',
+        'cruise_schedule_id',
+        'seats',
+        'cabin_class',
+        'total_price',
+        'extras',
+        'comment',
     ];
 
     protected $casts = [
@@ -25,7 +30,7 @@ class Booking extends Model
 
     public function cruiseSchedule()
     {
-        return $this->belongsTo(CruiseSchedule::class);
+        return $this->belongsTo(CruiseSchedule::class, 'cruise_schedule_id');
     }
 
     public function review()

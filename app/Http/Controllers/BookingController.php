@@ -27,13 +27,22 @@ class BookingController extends Controller
         $cruise = $schedule->cruise;
         $totalPrice = $cruise->price_per_person * $validated['seats'];
 
+        // Преобразуем extras в массив, если он пришёл как строка
+        $extras = $validated['extras'];
+        if (is_string($extras)) {
+            $extras = json_decode($extras, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['error' => 'Некорректный формат дополнительных услуг'], 400);
+            }
+        }
+
         $booking = Booking::create([
             'user_id' => $validated['user_id'],
             'cruise_schedule_id' => $schedule->id,
             'seats' => $validated['seats'],
             'cabin_class' => $validated['cabin_class'],
             'total_price' => $totalPrice,
-            'extras' => json_encode($validated['extras'] ?? []),
+            'extras' => $extras ?? [],
             'comment' => $validated['comment'],
         ]);
 
