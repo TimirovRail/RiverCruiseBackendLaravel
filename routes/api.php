@@ -24,6 +24,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
     Route::post('/me', [AuthController::class, 'me'])->middleware('auth:api')->name('me');
     Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth:api');
     Route::post('/bookings', [BookingController::class, 'store']);
+    Route::post('/upload-photos', [PhotoController::class, 'store']);
 });
 
 Route::middleware('auth:api')->group(function () {
@@ -57,7 +58,7 @@ Route::put('/services/{id}', [ServiceController::class, 'update'])->middleware('
 Route::delete('/services/{id}', [ServiceController::class, 'destroy'])->middleware('auth:api');
 
 Route::get('/photos', [PhotoController::class, 'index']);
-Route::post('/upload-photos', [PhotoController::class, 'store'])->middleware('auth:api');
+
 Route::delete('/photos/{id}', [PhotoController::class, 'destroy'])->middleware('auth:api');
 Route::get('/user/photos/{user_id}', [PhotoController::class, 'getUserPhotos']);
 
@@ -69,3 +70,10 @@ Route::put('/feedbacks/{id}', [FeedbackController::class, 'update'])->middleware
 Route::delete('/feedbacks/{id}', [FeedbackController::class, 'destroy'])->middleware('auth:api');
 
 Route::get('/all-data', [ProfileController::class, 'allData']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/auth/available-cruises', [FeedbackController::class, 'getAvailableCruises']);
+    Route::post('/auth/reviews', [FeedbackController::class, 'store']);
+});
+
+Route::get('/reviews', [FeedbackController::class, 'index']);

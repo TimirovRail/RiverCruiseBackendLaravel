@@ -25,7 +25,7 @@ class CruiseSchedule extends Model
 
     public function cruise()
     {
-        return $this->belongsTo(Cruise::class);
+        return $this->belongsTo(Cruise::class, 'cruise_id');
     }
 
     public function bookings()

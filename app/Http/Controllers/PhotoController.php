@@ -10,12 +10,12 @@ class PhotoController extends Controller
 {
     public function index()
     {
-        $photos = Photo::all()->pluck('url'); // Получаем только URL фотографий
+        $photos = Photo::all()->pluck('url');
         return response()->json($photos);
     }
+
     public function destroy($id)
     {
-        // Проверка, что id является числом
         if (!is_numeric($id)) {
             return response()->json(['error' => 'Некорректный ID фотографии'], 400);
         }
@@ -30,41 +30,52 @@ class PhotoController extends Controller
 
         return response()->json(['message' => 'Фотография успешно удалена']);
     }
+
     public function store(Request $request)
     {
-        $userId = $request->input('user_id');
-        if (!$userId || !is_numeric($userId)) {
-            return response()->json(['error' => 'Некорректный user_id'], 400);
+        // Логируем входящий запрос
+        \Log::info('Upload photos request:', [
+            'user_id' => $request->input('user_id'),
+            'files' => $request->file('photos'),
+        ]);
+
+        // Валидация данных
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Максимум 2MB на файл
+        ]);
+
+        // Проверяем наличие файлов
+        if (!$request->hasFile('photos')) {
+            return response()->json(['error' => 'Файлы не были загружены'], 400);
         }
 
         $photos = [];
 
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('public/user_photos');
-                $url = Storage::url($path);
-                $name = $photo->getClientOriginalName();
+        foreach ($request->file('photos') as $photo) {
+            $path = $photo->store('public/user_photos');
+            $url = Storage::url($path);
+            $name = $photo->getClientOriginalName();
 
-                $photoModel = new Photo([
-                    'user_id' => (int) $userId,
-                    'name' => $name,
-                    'url' => $url,
-                ]);
-                $photoModel->save();
+            $photoModel = new Photo([
+                'user_id' => (int) $validated['user_id'],
+                'name' => $name,
+                'url' => $url,
+            ]);
+            $photoModel->save();
 
-                $photos[] = [
-                    'url' => $url,
-                    'name' => $name,
-                    'user_id' => (int) $userId,
-                ];
-            }
+            $photos[] = [
+                'url' => $url,
+                'name' => $name,
+                'user_id' => (int) $validated['user_id'],
+            ];
         }
 
-        return response()->json(['photos' => $photos]);
+        return response()->json(['photos' => $photos], 200);
     }
+
     public function getUserPhotos($user_id)
     {
-        // Получаем фотографии пользователя по user_id
         $photos = Photo::where('user_id', $user_id)->get();
 
         if ($photos->isEmpty()) {
