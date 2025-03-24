@@ -10,14 +10,26 @@ class Cruise extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'description', 'river', 'cabins', 'price_per_person',
-        'image_path', 'features', 'departure_datetime', 'arrival_datetime', 'status',
+        'name',
+        'description',
+        'river',
+        'cabins',
+        'cabins_by_class',
+        'price_per_person',
+        'total_distance',
+        'panorama_url',
+        'image_path',
+        'features',
+        'departure_datetime',
+        'arrival_datetime',
+        'status',
     ];
 
     protected $casts = [
         'features' => 'array',
         'departure_datetime' => 'datetime',
         'arrival_datetime' => 'datetime',
+        'cabins_by_class' => 'array',
     ];
 
     public function schedules()
