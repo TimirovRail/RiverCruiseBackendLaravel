@@ -15,6 +15,12 @@ class CruiseSchedule extends Model
         'arrival_datetime',
         'total_places',
         'available_places',
+        'economy_places',
+        'standard_places',
+        'luxury_places',
+        'available_economy_places',
+        'available_standard_places',
+        'available_luxury_places',
         'status',
     ];
 

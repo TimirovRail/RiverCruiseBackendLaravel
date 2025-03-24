@@ -48,6 +48,7 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 Route::get('/cruises', [CruiseController::class, 'index']);
 Route::get('/cruise/{id}', [CruiseController::class, 'show']);
 Route::post('/cruises', [CruiseController::class, 'store'])->middleware('auth:api');
+Route::post('/cruises/{cruiseId}/schedules', [CruiseController::class, 'storeSchedule'])->middleware('auth:api');
 Route::put('/cruises/{id}', [CruiseController::class, 'update'])->middleware('auth:api');
 Route::delete('/cruises/{id}', [CruiseController::class, 'destroy'])->middleware('auth:api');
 

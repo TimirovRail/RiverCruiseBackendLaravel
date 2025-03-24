@@ -12,8 +12,9 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'cruise_schedule_id',
-        'seats',
-        'cabin_class',
+        'economy_seats',
+        'standard_seats',
+        'luxury_seats',
         'total_price',
         'extras',
         'comment',
