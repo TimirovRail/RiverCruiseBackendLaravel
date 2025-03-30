@@ -18,10 +18,12 @@ class Booking extends Model
         'total_price',
         'extras',
         'comment',
+        'is_paid',
     ];
 
     protected $casts = [
         'extras' => 'array',
+        'is_paid' => 'boolean',
     ];
 
     public function user()
