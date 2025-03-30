@@ -78,3 +78,8 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('/reviews', [FeedbackController::class, 'index']);
+Route::middleware('auth:api')->group(function () {
+    Route::get('/cruise-schedule/{schedule_id}/seats', [BookingController::class, 'getSeats']);
+    Route::post('/bookings/{booking_id}/reserve-seats', [BookingController::class, 'reserveSeats']);
+});
+Route::post('/bookings/{bookingId}/mark-as-paid', [BookingController::class, 'markAsPaid']); // Без middleware
