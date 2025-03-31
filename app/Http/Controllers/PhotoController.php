@@ -47,28 +47,37 @@ class PhotoController extends Controller
 
         // Проверяем наличие файлов
         if (!$request->hasFile('photos')) {
+            \Log::error('No photos uploaded');
             return response()->json(['error' => 'Файлы не были загружены'], 400);
         }
+
+        // Создаём папку, если она не существует
+        Storage::disk('public')->makeDirectory('user_photos');
 
         $photos = [];
 
         foreach ($request->file('photos') as $photo) {
-            $path = $photo->store('public/user_photos');
-            $url = Storage::url($path);
-            $name = $photo->getClientOriginalName();
+            try {
+                $path = $photo->store('user_photos', 'public');
+                $url = Storage::url($path);
+                $name = $photo->getClientOriginalName();
 
-            $photoModel = new Photo([
-                'user_id' => (int) $validated['user_id'],
-                'name' => $name,
-                'url' => $url,
-            ]);
-            $photoModel->save();
+                $photoModel = new Photo([
+                    'user_id' => (int) $validated['user_id'],
+                    'name' => $name,
+                    'url' => $url,
+                ]);
+                $photoModel->save();
 
-            $photos[] = [
-                'url' => $url,
-                'name' => $name,
-                'user_id' => (int) $validated['user_id'],
-            ];
+                $photos[] = [
+                    'url' => $url,
+                    'name' => $name,
+                    'user_id' => (int) $validated['user_id'],
+                ];
+            } catch (\Exception $e) {
+                \Log::error('Failed to save photo: ' . $e->getMessage());
+                return response()->json(['error' => 'Ошибка при сохранении фотографии: ' . $e->getMessage()], 500);
+            }
         }
 
         return response()->json(['photos' => $photos], 200);
