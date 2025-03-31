@@ -83,3 +83,4 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/bookings/{booking_id}/reserve-seats', [BookingController::class, 'reserveSeats']);
 });
 Route::post('/bookings/{bookingId}/mark-as-paid', [BookingController::class, 'markAsPaid']); // Без middleware
+
