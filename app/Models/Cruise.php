@@ -30,6 +30,8 @@ class Cruise extends Model
         'departure_datetime' => 'datetime',
         'arrival_datetime' => 'datetime',
         'cabins_by_class' => 'array',
+        'images' => 'array',
+        'price_per_person' => 'array',
     ];
 
     public function schedules()
