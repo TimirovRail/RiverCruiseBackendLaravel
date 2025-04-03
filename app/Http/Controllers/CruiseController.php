@@ -36,16 +36,28 @@ class CruiseController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'river' => 'required|string|max:255',
-            'cabins' => 'required|integer',
-            'price_per_person' => 'required|numeric',
-            'image_path' => 'nullable|string',
-            'features' => 'nullable|array',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'cabins_by_class' => 'nullable|array', // Например, ['economy' => 10, 'standard' => 10, 'luxury' => 5]
+            'cabins' => 'required|integer|min:0',
+            'total_duration' => 'required|string|max:255',
+            'features' => 'nullable|array', // Принимаем JSON
+            'images' => 'nullable|array',   // Принимаем JSON
+            'price_per_person' => 'required|array', // Принимаем объект
+            'price_per_person.name' => 'required|string|max:255',
+            'price_per_person.price' => 'required|numeric|min:0',
         ]);
 
-        $cruise = Cruise::create($validated);
+        $cruise = Cruise::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'river' => $validated['river'],
+            'cabins' => $validated['cabins'],
+            'total_duration' => $validated['total_duration'],
+            'features' => $validated['features'] ?? [],
+            'images' => $validated['images'] ?? [],
+            'price_per_person' => [
+                'name' => $validated['price_per_person']['name'],
+                'price' => $validated['price_per_person']['price'],
+            ],
+        ]);
 
         return response()->json($cruise, 201);
     }
