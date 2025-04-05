@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
+    public function index(Request $request)
+    {
+        $reviews = Review::with(['user', 'cruise'])->get();
+        return response()->json($reviews);
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -20,7 +25,7 @@ class ReviewController extends Controller
         $booking = Booking::where('user_id', $user->id)
             ->whereHas('cruiseSchedule', function ($query) use ($validated) {
                 $query->where('cruise_id', $validated['cruise_id'])
-                      ->where('arrival_datetime', '<', now());
+                    ->where('arrival_datetime', '<', now());
             })
             ->first();
 

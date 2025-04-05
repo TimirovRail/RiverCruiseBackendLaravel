@@ -9,6 +9,40 @@ use App\Models\ReservedSeat;
 
 class BookingController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+        $query = Booking::with(['user', 'cruiseSchedule.cruise']);
+
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        $bookings = $query->get()->map(function ($booking) {
+            return [
+                'id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'cruise_schedule_id' => $booking->cruise_schedule_id,
+                'economy_seats' => $booking->economy_seats,
+                'standard_seats' => $booking->standard_seats,
+                'luxury_seats' => $booking->luxury_seats,
+                'total_price' => $booking->total_price,
+                'extras' => $booking->extras,
+                'comment' => $booking->comment,
+                'is_paid' => $booking->is_paid,
+                'status' => $booking->is_paid ? 'Подтверждено' : 'В ожидании',
+                'user_name' => $booking->user ? $booking->user->name : '—',
+                'user_email' => $booking->user ? $booking->user->email : '—',
+                'cruise_name' => $booking->cruiseSchedule && $booking->cruiseSchedule->cruise ? $booking->cruiseSchedule->cruise->name : '—',
+                'departure_datetime' => $booking->cruiseSchedule ? $booking->cruiseSchedule->departure_datetime : null,
+                'created_at' => $booking->created_at,
+                'updated_at' => $booking->updated_at,
+            ];
+        });
+
+        return response()->json($bookings);
+    }
+
     public function store(Request $request)
     {
         // Логируем входящие данные
@@ -107,11 +141,6 @@ class BookingController extends Controller
         return response()->json(['message' => 'Бронь создана', 'booking' => $booking], 201);
     }
 
-    public function index()
-    {
-        $bookings = Booking::with('cruiseSchedule.cruise')->where('user_id', auth()->id())->get();
-        return response()->json($bookings);
-    }
     public function getSeats($scheduleId)
     {
         $schedule = CruiseSchedule::findOrFail($scheduleId);
@@ -202,6 +231,7 @@ class BookingController extends Controller
             'booking' => $booking
         ]);
     }
+
     public function markAsPaid($bookingId)
     {
         $booking = Booking::findOrFail($bookingId);

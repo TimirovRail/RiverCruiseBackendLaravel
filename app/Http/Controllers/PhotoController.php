@@ -10,7 +10,18 @@ class PhotoController extends Controller
 {
     public function index()
     {
-        $photos = Photo::all()->pluck('url');
+        $photos = Photo::with('user')->get()->map(function ($photo) {
+            return [
+                'id' => $photo->id,
+                'user_id' => $photo->user_id,
+                'name' => $photo->name,
+                'url' => $photo->url,
+                'user_name' => $photo->user ? $photo->user->name : '—',
+                'created_at' => $photo->created_at,
+                'updated_at' => $photo->updated_at,
+            ];
+        });
+
         return response()->json($photos);
     }
 

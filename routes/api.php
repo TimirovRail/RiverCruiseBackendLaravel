@@ -52,6 +52,11 @@ Route::post('/cruises', [CruiseController::class, 'store'])->middleware('auth:ap
 Route::post('/cruises/{cruiseId}/schedules', [CruiseController::class, 'storeSchedule'])->middleware('auth:api');
 Route::put('/cruises/{id}', [CruiseController::class, 'update'])->middleware('auth:api');
 Route::delete('/cruises/{id}', [CruiseController::class, 'destroy'])->middleware('auth:api');
+Route::put('/cruises/schedules/{id}', [CruiseController::class, 'updateSchedule'])->middleware('auth:api');
+Route::delete('/cruises/schedules/{id}', [CruiseController::class, 'destroySchedule'])->middleware('auth:api');
+
+// Восстановим маршрут для получения расписаний
+Route::get('/cruise_schedules', [CruiseScheduleController::class, 'index']);
 
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
@@ -60,7 +65,6 @@ Route::put('/services/{id}', [ServiceController::class, 'update'])->middleware('
 Route::delete('/services/{id}', [ServiceController::class, 'destroy'])->middleware('auth:api');
 
 Route::get('/photos', [PhotoController::class, 'index']);
-
 Route::delete('/photos/{id}', [PhotoController::class, 'destroy'])->middleware('auth:api');
 Route::get('/user/photos/{user_id}', [PhotoController::class, 'getUserPhotos']);
 
@@ -83,8 +87,4 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/cruise-schedule/{schedule_id}/seats', [BookingController::class, 'getSeats']);
     Route::post('/bookings/{booking_id}/reserve-seats', [BookingController::class, 'reserveSeats']);
 });
-Route::post('/bookings/{bookingId}/mark-as-paid', [BookingController::class, 'markAsPaid']); 
-Route::middleware('auth:api')->group(function () {
-    Route::get('/cruise_schedules', [CruiseScheduleController::class, 'index']);
-});
-
+Route::post('/bookings/{bookingId}/mark-as-paid', [BookingController::class, 'markAsPaid']);
