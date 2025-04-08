@@ -40,6 +40,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
 });
 
+Route::get('/reviews', [ReviewController::class, 'index']);
+Route::post('/reviews/{id}/cancel', [ReviewController::class, 'cancel']);
+Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return response()->json(['message' => 'Welcome, Admin!']);
@@ -48,12 +52,12 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 
 Route::get('/cruises', [CruiseController::class, 'index']);
 Route::get('/cruise/{id}', [CruiseController::class, 'show']);
-Route::post('/cruises', [CruiseController::class, 'store'])->middleware('auth:api');
-Route::post('/cruises/{cruiseId}/schedules', [CruiseController::class, 'storeSchedule'])->middleware('auth:api');
-Route::put('/cruises/{id}', [CruiseController::class, 'update'])->middleware('auth:api');
-Route::delete('/cruises/{id}', [CruiseController::class, 'destroy'])->middleware('auth:api');
-Route::put('/cruises/schedules/{id}', [CruiseController::class, 'updateSchedule'])->middleware('auth:api');
-Route::delete('/cruises/schedules/{id}', [CruiseController::class, 'destroySchedule'])->middleware('auth:api');
+Route::post('/cruises', [CruiseController::class, 'store']);
+Route::post('/cruises/{cruiseId}/schedules', [CruiseController::class, 'storeSchedule']);
+Route::put('/cruises/{id}', [CruiseController::class, 'update']);
+Route::delete('/cruises/{id}', [CruiseController::class, 'destroy']);
+Route::put('/cruises/schedules/{id}', [CruiseController::class, 'updateSchedule']);
+Route::delete('/cruises/schedules/{id}', [CruiseController::class, 'destroySchedule']);
 
 // Восстановим маршрут для получения расписаний
 Route::get('/cruise_schedules', [CruiseScheduleController::class, 'index']);
