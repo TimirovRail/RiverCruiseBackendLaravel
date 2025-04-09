@@ -54,13 +54,12 @@ class ReviewController extends Controller
             return response()->json(['message' => 'Отзыв не найден'], 404);
         }
 
-        $review->is_active = false; // Предполагаем поле is_active для статуса
+        $review->is_active = false; 
         $review->save();
 
         return response()->json(['message' => 'Отзыв отменён']);
     }
 
-    // Удалить отзыв
     public function destroy($id)
     {
         $review = Review::find($id);

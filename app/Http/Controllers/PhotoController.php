@@ -44,25 +44,21 @@ class PhotoController extends Controller
 
     public function store(Request $request)
     {
-        // Логируем входящий запрос
         \Log::info('Upload photos request:', [
             'user_id' => $request->input('user_id'),
             'files' => $request->file('photos'),
         ]);
 
-        // Валидация данных
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Максимум 2MB на файл
         ]);
 
-        // Проверяем наличие файлов
         if (!$request->hasFile('photos')) {
             \Log::error('No photos uploaded');
             return response()->json(['error' => 'Файлы не были загружены'], 400);
         }
 
-        // Создаём папку, если она не существует
         Storage::disk('public')->makeDirectory('user_photos');
 
         $photos = [];
