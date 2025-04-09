@@ -45,7 +45,6 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-        // Логируем входящие данные
         \Log::info('BookingController: Входящие данные', $request->all());
 
         $validated = $request->validate([
@@ -61,7 +60,6 @@ class BookingController extends Controller
 
         $schedule = CruiseSchedule::findOrFail($validated['cruise_schedule_id']);
 
-        // Проверяем, что сумма мест по классам совпадает с total_seats
         $totalSeats = (int) $validated['total_seats'];
         $economySeats = (int) $validated['economy_seats'];
         $standardSeats = (int) $validated['standard_seats'];
@@ -80,7 +78,6 @@ class BookingController extends Controller
             return response()->json(['error' => "Сумма мест по классам ($sumOfSeats) не совпадает с общим количеством мест ($totalSeats)"], 400);
         }
 
-        // Проверяем доступность мест для каждого класса
         if ($economySeats > $schedule->available_economy_places) {
             return response()->json(['error' => 'Недостаточно мест для класса "Эконом"'], 400);
         }
@@ -93,13 +90,11 @@ class BookingController extends Controller
 
         $cruise = $schedule->cruise;
 
-        // Рассчитываем цену с учётом множителей для каждого класса
         $totalPrice = 0;
         $totalPrice += $economySeats * $cruise->price_per_person * 1; // Эконом: x1
         $totalPrice += $standardSeats * $cruise->price_per_person * 1.5; // Стандарт: x1.5
         $totalPrice += $luxurySeats * $cruise->price_per_person * 2; // Люкс: x2
 
-        // Преобразуем extras в массив, если он пришёл как строка
         $extras = $validated['extras'];
         if (is_string($extras)) {
             $extras = json_decode($extras, true);
@@ -108,7 +103,6 @@ class BookingController extends Controller
             }
         }
 
-        // Создаём бронирование
         $booking = Booking::create([
             'user_id' => $validated['user_id'],
             'cruise_schedule_id' => $validated['cruise_schedule_id'],
@@ -127,12 +121,10 @@ class BookingController extends Controller
             'luxury_seats' => $booking->luxury_seats,
         ]);
 
-        // Уменьшаем количество доступных мест для каждого класса
         $schedule->decrement('available_economy_places', $economySeats);
         $schedule->decrement('available_standard_places', $standardSeats);
         $schedule->decrement('available_luxury_places', $luxurySeats);
 
-        // Обновляем общее количество доступных мест
         $schedule->available_places = $schedule->available_economy_places +
             $schedule->available_standard_places +
             $schedule->available_luxury_places;
@@ -173,7 +165,6 @@ class BookingController extends Controller
         $schedule = CruiseSchedule::findOrFail($booking->cruise_schedule_id);
         $seats = $request->input('seats');
 
-        // Подсчитываем количество мест по категориям
         $newEconomySeats = count($seats['economy'] ?? []);
         $newStandardSeats = count($seats['standard'] ?? []);
         $newLuxurySeats = count($seats['luxury'] ?? []);
@@ -185,7 +176,6 @@ class BookingController extends Controller
                 return response()->json(['error' => "Недостаточно мест в категории $category"], 400);
             }
 
-            // Проверяем, не заняты ли места
             $taken = ReservedSeat::where('schedule_id', $schedule->id)
                 ->where('category', $category)
                 ->whereIn('seat_number', $seatNumbers)
@@ -194,7 +184,6 @@ class BookingController extends Controller
                 return response()->json(['error' => "Некоторые места в категории $category уже заняты"], 400);
             }
 
-            // Резервируем места
             foreach ($seatNumbers as $seatNumber) {
                 ReservedSeat::create([
                     'booking_id' => $bookingId,
@@ -206,12 +195,10 @@ class BookingController extends Controller
             $schedule->decrement($availableField, count($seatNumbers));
         }
 
-        // Обновляем количество мест в бронировании
         $booking->economy_seats = $newEconomySeats;
         $booking->standard_seats = $newStandardSeats;
         $booking->luxury_seats = $newLuxurySeats;
 
-        // Пересчитываем стоимость
         $cruise = $schedule->cruise;
         $totalPrice = 0;
         $totalPrice += $newEconomySeats * $cruise->price_per_person * 1;   // Эконом: x1

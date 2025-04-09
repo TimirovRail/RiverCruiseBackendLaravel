@@ -59,7 +59,6 @@ Route::delete('/cruises/{id}', [CruiseController::class, 'destroy']);
 Route::put('/cruises/schedules/{id}', [CruiseController::class, 'updateSchedule']);
 Route::delete('/cruises/schedules/{id}', [CruiseController::class, 'destroySchedule']);
 
-// Восстановим маршрут для получения расписаний
 Route::get('/cruise_schedules', [CruiseScheduleController::class, 'index']);
 
 Route::get('/services', [ServiceController::class, 'index']);
@@ -69,7 +68,7 @@ Route::put('/services/{id}', [ServiceController::class, 'update'])->middleware('
 Route::delete('/services/{id}', [ServiceController::class, 'destroy'])->middleware('auth:api');
 
 Route::get('/photos', [PhotoController::class, 'index']);
-Route::delete('/photos/{id}', [PhotoController::class, 'destroy'])->middleware('auth:api');
+Route::delete('/photos/{id}', [PhotoController::class, 'destroy']);
 Route::get('/user/photos/{user_id}', [PhotoController::class, 'getUserPhotos']);
 
 Route::get('/souvenirs', [SouvenirController::class, 'index']);
