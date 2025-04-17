@@ -16,7 +16,7 @@ class AuthController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed|min:8',
-            'role' => 'in:admin,user',
+            'role' => 'in:admin,user,manager',
         ]);
 
         if ($validator->fails()) {
@@ -27,7 +27,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => $request->role ?? 'user',
+            'role' => trim($request->role ?? 'user'),
         ]);
 
         return response()->json($user, 201);
@@ -42,17 +42,18 @@ class AuthController extends Controller
         }
 
         $user = auth('api')->user();
+        $role = trim($user->role);
 
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
-            'role' => $user->role,
-            'user' => [ // Возвращаем данные пользователя
+            'role' => $role,
+            'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role' => $role,
             ],
         ]);
     }

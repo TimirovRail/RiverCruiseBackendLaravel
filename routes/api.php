@@ -14,6 +14,7 @@ use App\Http\Controllers\SouvenirController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\API\CruiseScheduleController;
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -91,3 +92,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/bookings/{booking_id}/reserve-seats', [BookingController::class, 'reserveSeats']);
 });
 Route::post('/bookings/{bookingId}/mark-as-paid', [BookingController::class, 'markAsPaid']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/manager/profile', [ManagerController::class, 'profile']);
+});
