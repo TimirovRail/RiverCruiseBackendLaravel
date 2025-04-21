@@ -23,73 +23,45 @@ class ManagerController extends Controller
 
     public function verifyTicket(Request $request)
     {
-        $request->validate([
-            'booking_id' => 'required|integer',
-            'user_id' => 'required|integer',
-            'cruise_schedule_id' => 'required|integer',
-            'economy_seats' => 'required|integer',
-            'standard_seats' => 'required|integer',
-            'luxury_seats' => 'required|integer',
-        ]);
+        try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:bookings,id',
+                'user_id' => 'required|integer|exists:users,id',
+                'cruise_schedule_id' => 'required|integer|exists:cruise_schedules,id',
+                'economy_seats' => 'nullable|integer|min:0',
+                'standard_seats' => 'nullable|integer|min:0',
+                'luxury_seats' => 'nullable|integer|min:0',
+            ]);
 
-        $booking = Booking::where('id', $request->booking_id)
-            ->where('user_id', $request->user_id)
-            ->where('cruise_schedule_id', $request->cruise_schedule_id)
-            ->first();
+            $data['economy_seats'] = (int) ($request->economy_seats ?? 0);
+            $data['standard_seats'] = (int) ($request->standard_seats ?? 0);
+            $data['luxury_seats'] = (int) ($request->luxury_seats ?? 0);
+            
+            $booking = Booking::where('id', $data['booking_id'])
+                ->where('user_id', $data['user_id'])
+                ->where('cruise_schedule_id', $data['cruise_schedule_id'])
+                ->where('is_paid', true)
+                ->with(['cruiseSchedule.cruise'])
+                ->first();
 
-        if (!$booking) {
+            if (!$booking) {
+                return response()->json(['valid' => false, 'message' => 'Билет не найден или не оплачен'], 404);
+            }
+
             return response()->json([
-                'valid' => false,
-                'message' => 'Бронирование не найдено',
-            ], 404);
+                'valid' => true,
+                'message' => 'Билет действителен',
+                'ticket' => [
+                    'cruise_name' => $booking->cruiseSchedule->cruise->name,
+                    'departure_datetime' => $booking->cruiseSchedule->departure_datetime,
+                    'economy_seats' => $booking->economy_seats,
+                    'standard_seats' => $booking->standard_seats,
+                    'luxury_seats' => $booking->luxury_seats,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Ошибка проверки билета: ' . $e->getMessage());
+            return response()->json(['valid' => false, 'message' => 'Ошибка сервера: ' . $e->getMessage()], 500);
         }
-
-        if (
-            $booking->economy_seats != $request->economy_seats ||
-            $booking->standard_seats != $request->standard_seats ||
-            $booking->luxury_seats != $request->luxury_seats
-        ) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Данные мест не совпадают с бронированием',
-            ], 400);
-        }
-
-        if (!$booking->is_paid) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Бронирование не оплачено',
-            ], 400);
-        }
-
-        $departureDate = new \DateTime($booking->departure_datetime);
-        $now = new \DateTime();
-        if ($departureDate < $now) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Срок действия билета истёк',
-            ], 400);
-        }
-
-        if ($booking->status === 'used') {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Билет уже использован',
-            ], 400);
-        }
-        $booking->status = 'used';
-        $booking->save();
-
-        return response()->json([
-            'valid' => true,
-            'message' => 'Билет успешно подтверждён',
-            'ticket' => [
-                'cruise_name' => $booking->cruise_name,
-                'departure_datetime' => $booking->departure_datetime,
-                'economy_seats' => $booking->economy_seats,
-                'standard_seats' => $booking->standard_seats,
-                'luxury_seats' => $booking->luxury_seats,
-            ],
-        ]);
     }
 }
