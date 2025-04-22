@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\CruiseLocationController;
 use App\Http\Controllers\API\CruiseScheduleController;
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -97,3 +98,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/manager/profile', [ManagerController::class, 'profile']);
 });
 Route::middleware('auth:sanctum')->post('/manager/verify-ticket', [ManagerController::class, 'verifyTicket']);
+
+Route::get('/cruise-locations', [CruiseLocationController::class, 'getCurrentLocations']);
+Route::post('/update-cruise-locations', [CruiseLocationController::class, 'updateLocations']);
