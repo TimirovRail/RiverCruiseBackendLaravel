@@ -23,6 +23,8 @@ class Cruise extends Model
         'departure_datetime',
         'arrival_datetime',
         'status',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
@@ -47,5 +49,14 @@ class Cruise extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+    public function locations()
+    {
+        return $this->hasMany(CruiseLocation::class);
+    }
+
+    public function latestLocation()
+    {
+        return $this->hasOne(CruiseLocation::class)->latest('recorded_at');
     }
 }
