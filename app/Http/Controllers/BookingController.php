@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\CruiseSchedule;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Models\ReservedSeat;
+use Illuminate\Support\Facades\DB;
+use App\Models\CruiseSeat;
+use App\Models\BookedSeat;
 
 class BookingController extends Controller
 {
@@ -226,5 +230,59 @@ class BookingController extends Controller
         $booking->save();
 
         return response()->json(['message' => 'Билет отмечен как оплаченный', 'booking' => $booking]);
+    }
+    public function destroy($id)
+    {
+        try {
+            // Находим бронь
+            $booking = Booking::findOrFail($id);
+
+            // Проверяем, что бронь не оплачена
+            if ($booking->is_paid) {
+                return response()->json(['message' => 'Cannot cancel paid booking'], 400);
+            }
+
+            // Начинаем транзакцию для обеспечения целостности данных
+            DB::beginTransaction();
+
+            // 1. Освобождаем места в cruise_seats
+            $cruiseScheduleId = $booking->cruise_schedule_id;
+
+            // Обновляем available_seats для каждого типа мест
+            if ($booking->economy_seats > 0) {
+                CruiseSeat::where('cruise_schedule_id', $cruiseScheduleId)
+                    ->where('seat_type', 'economy')
+                    ->increment('available_seats', $booking->economy_seats);
+            }
+
+            if ($booking->standard_seats > 0) {
+                CruiseSeat::where('cruise_schedule_id', $cruiseScheduleId)
+                    ->where('seat_type', 'standard')
+                    ->increment('available_seats', $booking->standard_seats);
+            }
+
+            if ($booking->luxury_seats > 0) {
+                CruiseSeat::where('cruise_schedule_id', $cruiseScheduleId)
+                    ->where('seat_type', 'luxury')
+                    ->increment('available_seats', $booking->luxury_seats);
+            }
+
+            // 2. Удаляем записи из booked_seats (конкретные места)
+            BookedSeat::where('booking_id', $booking->id)->delete();
+
+            // 3. Удаляем саму бронь
+            $booking->delete();
+
+            // Фиксируем транзакцию
+            DB::commit();
+
+            return response()->json(['message' => 'Booking cancelled successfully'], 200);
+        } catch (\Exception $e) {
+            // Откатываем транзакцию в случае ошибки
+            DB::rollBack();
+
+            \Log::error("Error cancelling booking ID: {$id}, Error: " . $e->getMessage());
+            return response()->json(['message' => 'Error cancelling booking: ' . $e->getMessage()], 500);
+        }
     }
 }

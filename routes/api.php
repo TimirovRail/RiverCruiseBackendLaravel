@@ -101,3 +101,5 @@ Route::middleware('auth:sanctum')->post('/manager/verify-ticket', [ManagerContro
 
 Route::get('/cruise-locations', [CruiseLocationController::class, 'getCurrentLocations']);
 Route::post('/update-cruise-locations', [CruiseLocationController::class, 'updateLocations']);
+
+Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
