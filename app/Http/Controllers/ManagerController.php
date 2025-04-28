@@ -36,12 +36,12 @@ class ManagerController extends Controller
             $data['economy_seats'] = (int) ($request->economy_seats ?? 0);
             $data['standard_seats'] = (int) ($request->standard_seats ?? 0);
             $data['luxury_seats'] = (int) ($request->luxury_seats ?? 0);
-            
+
             $booking = Booking::where('id', $data['booking_id'])
                 ->where('user_id', $data['user_id'])
                 ->where('cruise_schedule_id', $data['cruise_schedule_id'])
                 ->where('is_paid', true)
-                ->with(['cruiseSchedule.cruise'])
+                ->with(['cruiseSchedule.cruise', 'user'])
                 ->first();
 
             if (!$booking) {
@@ -57,6 +57,13 @@ class ManagerController extends Controller
                     'economy_seats' => $booking->economy_seats,
                     'standard_seats' => $booking->standard_seats,
                     'luxury_seats' => $booking->luxury_seats,
+                    'total_price' => $booking->total_price,
+                    'comment' => $booking->comment,
+                    'extras' => $booking->extras,
+                ],
+                'user' => [
+                    'name' => $booking->user->name,
+                    'email' => $booking->user->email,
                 ],
             ]);
         } catch (\Exception $e) {

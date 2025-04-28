@@ -97,7 +97,7 @@ Route::post('/bookings/{bookingId}/mark-as-paid', [BookingController::class, 'ma
 Route::middleware('auth:api')->group(function () {
     Route::get('/manager/profile', [ManagerController::class, 'profile']);
 });
-Route::middleware('auth:sanctum')->post('/manager/verify-ticket', [ManagerController::class, 'verifyTicket']);
+Route::post('/manager/verify-ticket', [ManagerController::class, 'verifyTicket']);
 
 Route::get('/cruise-locations', [CruiseLocationController::class, 'getCurrentLocations']);
 Route::post('/update-cruise-locations', [CruiseLocationController::class, 'updateLocations']);
