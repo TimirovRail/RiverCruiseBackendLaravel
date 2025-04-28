@@ -37,39 +37,62 @@ class FeedbackController extends Controller
 
         \Log::info('Существующие отзывы:', ['booking_ids' => $existingReviews]);
 
-        // Фильтруем бронирования
-        $availableCruises = $bookings->filter(function ($booking) use ($existingReviews) {
+        // Фильтруем бронирования и собираем данные о круизах
+        $cruisesMap = [];
+
+        $bookings->each(function ($booking) use ($existingReviews, &$cruisesMap) {
             // Пропускаем, если для бронирования уже есть отзыв
             if (in_array($booking->id, $existingReviews)) {
                 \Log::info('Бронирование уже имеет отзыв:', ['booking_id' => $booking->id]);
-                return false;
+                return;
             }
 
             if (!$booking->cruiseSchedule) {
                 \Log::warning('Бронирование без расписания:', ['booking_id' => $booking->id]);
-                return false;
+                return;
+            }
+
+            if (!$booking->cruiseSchedule->cruise) {
+                \Log::warning('Расписание без круиза:', ['schedule_id' => $booking->cruiseSchedule->id]);
+                return;
             }
 
             $departureDate = Carbon::parse($booking->cruiseSchedule->departure_datetime);
-            \Log::info('Проверка даты круиза:', [
-                'booking_id' => $booking->id,
-                'departure_datetime' => $booking->cruiseSchedule->departure_datetime,
-                'is_past' => $departureDate->isPast(),
-            ]);
-            return $departureDate->isPast();
-        })->map(function ($booking) {
-            if (!$booking->cruiseSchedule->cruise) {
-                \Log::warning('Расписание без круиза:', ['schedule_id' => $booking->cruiseSchedule->id]);
-                return null;
+            if (!$departureDate->isPast()) {
+                \Log::info('Круиз ещё не завершён:', [
+                    'booking_id' => $booking->id,
+                    'departure_datetime' => $booking->cruiseSchedule->departure_datetime,
+                ]);
+                return;
             }
 
-            return [
-                'cruise_id' => $booking->cruiseSchedule->cruise->id,
-                'cruise_name' => $booking->cruiseSchedule->cruise->name,
-                'booking_id' => $booking->id,
-                'departure_datetime' => $booking->cruiseSchedule->departure_datetime,
-            ];
-        })->filter()->values();
+            $cruiseId = $booking->cruiseSchedule->cruise->id;
+
+            // Если круиз уже добавлен, сравниваем даты отправления
+            if (isset($cruisesMap[$cruiseId])) {
+                $existingDepartureDate = Carbon::parse($cruisesMap[$cruiseId]['departure_datetime']);
+                if ($departureDate->lt($existingDepartureDate)) {
+                    // Если текущая дата отправления раньше, обновляем запись
+                    $cruisesMap[$cruiseId] = [
+                        'cruise_id' => $cruiseId,
+                        'cruise_name' => $booking->cruiseSchedule->cruise->name,
+                        'booking_id' => $booking->id,
+                        'departure_datetime' => $booking->cruiseSchedule->departure_datetime,
+                    ];
+                }
+            } else {
+                // Добавляем круиз в массив
+                $cruisesMap[$cruiseId] = [
+                    'cruise_id' => $cruiseId,
+                    'cruise_name' => $booking->cruiseSchedule->cruise->name,
+                    'booking_id' => $booking->id,
+                    'departure_datetime' => $booking->cruiseSchedule->departure_datetime,
+                ];
+            }
+        });
+
+        // Преобразуем массив в коллекцию и сбрасываем индексы
+        $availableCruises = collect(array_values($cruisesMap));
 
         \Log::info('Доступные круизы:', ['available_cruises' => $availableCruises->toArray()]);
 

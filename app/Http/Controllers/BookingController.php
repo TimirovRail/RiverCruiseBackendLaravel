@@ -239,36 +239,36 @@ class BookingController extends Controller
 
             // Проверяем, что бронь не оплачена
             if ($booking->is_paid) {
-                return response()->json(['message' => 'Cannot cancel paid booking'], 400);
+                return response()->json(['message' => 'Нельзя отменить оплаченную бронь'], 400);
             }
 
             // Начинаем транзакцию для обеспечения целостности данных
             DB::beginTransaction();
 
-            // 1. Освобождаем места в cruise_seats
-            $cruiseScheduleId = $booking->cruise_schedule_id;
+            // 1. Освобождаем места в cruise_schedules
+            $cruiseSchedule = CruiseSchedule::findOrFail($booking->cruise_schedule_id);
 
-            // Обновляем available_seats для каждого типа мест
+            // Увеличиваем количество доступных мест
             if ($booking->economy_seats > 0) {
-                CruiseSeat::where('cruise_schedule_id', $cruiseScheduleId)
-                    ->where('seat_type', 'economy')
-                    ->increment('available_seats', $booking->economy_seats);
+                $cruiseSchedule->increment('available_economy_places', $booking->economy_seats);
             }
 
             if ($booking->standard_seats > 0) {
-                CruiseSeat::where('cruise_schedule_id', $cruiseScheduleId)
-                    ->where('seat_type', 'standard')
-                    ->increment('available_seats', $booking->standard_seats);
+                $cruiseSchedule->increment('available_standard_places', $booking->standard_seats);
             }
 
             if ($booking->luxury_seats > 0) {
-                CruiseSeat::where('cruise_schedule_id', $cruiseScheduleId)
-                    ->where('seat_type', 'luxury')
-                    ->increment('available_seats', $booking->luxury_seats);
+                $cruiseSchedule->increment('available_luxury_places', $booking->luxury_seats);
             }
 
-            // 2. Удаляем записи из booked_seats (конкретные места)
-            BookedSeat::where('booking_id', $booking->id)->delete();
+            // Пересчитываем общее количество доступных мест
+            $cruiseSchedule->available_places = $cruiseSchedule->available_economy_places +
+                $cruiseSchedule->available_standard_places +
+                $cruiseSchedule->available_luxury_places;
+            $cruiseSchedule->save();
+
+            // 2. Удаляем записи из reserved_seats (конкретные зарезервированные места)
+            ReservedSeat::where('booking_id', $booking->id)->delete();
 
             // 3. Удаляем саму бронь
             $booking->delete();
@@ -276,13 +276,13 @@ class BookingController extends Controller
             // Фиксируем транзакцию
             DB::commit();
 
-            return response()->json(['message' => 'Booking cancelled successfully'], 200);
+            return response()->json(['message' => 'Бронь успешно отменена'], 200);
         } catch (\Exception $e) {
             // Откатываем транзакцию в случае ошибки
             DB::rollBack();
 
             \Log::error("Error cancelling booking ID: {$id}, Error: " . $e->getMessage());
-            return response()->json(['message' => 'Error cancelling booking: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Ошибка при отмене брони: ' . $e->getMessage()], 500);
         }
     }
 }
