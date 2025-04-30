@@ -45,6 +45,8 @@ Route::middleware('auth:api')->group(function () {
 Route::get('/reviews', [ReviewController::class, 'index']);
 Route::post('/reviews/{id}/cancel', [ReviewController::class, 'cancel']);
 Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+Route::get('/auth/available-cruises', [ReviewController::class, 'availableCruises']);
+Route::post('/auth/reviews', [ReviewController::class, 'store']);
 
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
