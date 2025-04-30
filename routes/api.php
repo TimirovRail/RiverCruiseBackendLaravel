@@ -103,3 +103,4 @@ Route::get('/cruise-locations', [CruiseLocationController::class, 'getCurrentLoc
 Route::post('/update-cruise-locations', [CruiseLocationController::class, 'updateLocations']);
 
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
+Route::middleware('auth:api')->post('/auth/verify-two-factor', [AuthController::class, 'verifyTwoFactor'])->name('verify-two-factor');
