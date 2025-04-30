@@ -47,8 +47,8 @@ class CruiseLocationController extends Controller
                 $currentLongitude = $latestLocation ? $latestLocation->longitude : 37.6173;
 
                 // Симуляция обновления координат
-                $newLatitude = $currentLatitude + (rand(-10, 10) / 1000);
-                $newLongitude = $currentLongitude + (rand(-10, 10) / 1000);
+                $newLatitude = $currentLatitude + (rand(-10, 10) / 10000);
+                $newLongitude = $currentLongitude + (rand(-10, 10) / 10000);
 
                 // Сохраняем новое местоположение только в таблице cruise_locations
                 $cruise->locations()->create([

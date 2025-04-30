@@ -98,6 +98,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/manager/profile', [ManagerController::class, 'profile']);
 });
 Route::post('/manager/verify-ticket', [ManagerController::class, 'verifyTicket']);
+Route::post('/manager/mark-as-attended', [ManagerController::class, 'markAsAttended']);
 
 Route::get('/cruise-locations', [CruiseLocationController::class, 'getCurrentLocations']);
 Route::post('/update-cruise-locations', [CruiseLocationController::class, 'updateLocations']);
