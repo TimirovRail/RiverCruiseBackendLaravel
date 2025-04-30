@@ -19,6 +19,7 @@ class Booking extends Model
         'extras',
         'comment',
         'is_paid',
+        'attended',
     ];
 
     protected $casts = [
