@@ -29,11 +29,8 @@ class Cruise extends Model
 
     protected $casts = [
         'features' => 'array',
-        'departure_datetime' => 'datetime',
-        'arrival_datetime' => 'datetime',
         'cabins_by_class' => 'array',
-        'images' => 'array',
-        'price_per_person' => 'array',
+        'price_per_person' => 'float', // Исправлено с 'array' на 'float'
     ];
 
     public function schedules()
@@ -50,6 +47,7 @@ class Cruise extends Model
     {
         return $this->hasMany(Review::class);
     }
+
     public function locations()
     {
         return $this->hasMany(CruiseLocation::class);

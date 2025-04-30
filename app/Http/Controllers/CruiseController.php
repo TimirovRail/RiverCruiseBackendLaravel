@@ -35,20 +35,55 @@ class CruiseController extends Controller
             'cabins' => 'required|integer|min:0',
             'price_per_person' => 'required|numeric|min:0',
             'total_distance' => 'required|numeric|min:0',
-            'image_path' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Валидация для основного изображения
             'panorama_url' => 'nullable|string',
             'features' => 'nullable|array',
             'features.*.name' => 'required_with:features|string',
             'features.*.price' => 'required_with:features|numeric|min:0',
-            'cabins_by_class.luxury.places' => 'required|integer|min:0',
-            'cabins_by_class.luxury.image_path' => 'nullable|string',
-            'cabins_by_class.economy.places' => 'required|integer|min:0',
-            'cabins_by_class.economy.image_path' => 'nullable|string',
-            'cabins_by_class.standard.places' => 'required|integer|min:0',
-            'cabins_by_class.standard.image_path' => 'nullable|string',
+            'cabins_by_class' => 'required|json',
+            'luxury_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Валидация для изображения кают
+            'economy_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'standard_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $cruise = Cruise::create($validated);
+        // Обрабатываем основное изображение круиза
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public'); // Сохраняем в public/storage/images
+        }
+
+        // Обрабатываем изображения кают
+        $cabinsByClass = json_decode($request->input('cabins_by_class'), true);
+        $classes = ['luxury', 'economy', 'standard'];
+        foreach ($classes as $class) {
+            if ($request->hasFile("{$class}_image")) {
+                $cabinImagePath = $request->file("{$class}_image")->store('images/cabins', 'public');
+                $cabinsByClass[$class]['image_path'] = $cabinImagePath;
+            } else {
+                $cabinsByClass[$class]['image_path'] = null; // Если изображение не загружено
+            }
+        }
+
+        // Подготавливаем данные для создания круиза
+        $cruiseData = [
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'river' => $validated['river'],
+            'cabins' => $validated['cabins'],
+            'price_per_person' => $validated['price_per_person'],
+            'total_distance' => $validated['total_distance'],
+            'image_path' => $imagePath,
+            'panorama_url' => $validated['panorama_url'] ?? null,
+            'cabins_by_class' => $cabinsByClass,
+            'features' => $validated['features'] ?? [],
+            'created_at' => now(),
+            'updated_at' => now(),
+            'departure_datetime' => now(), // Временное значение
+            'arrival_datetime' => now()->addDay(), // Временное значение
+            'status' => 'planned', // Значение по умолчанию
+        ];
+
+        $cruise = Cruise::create($cruiseData);
         return response()->json($cruise, 201);
     }
 
@@ -90,6 +125,8 @@ class CruiseController extends Controller
                 'cabins_by_class.standard.places' => 'required|integer|min:0',
                 'cabins_by_class.standard.image_path' => 'nullable|string',
             ]);
+
+            $validated['updated_at'] = now();
 
             $cruise = Cruise::findOrFail($id);
             $cruise->update($validated);
@@ -133,5 +170,4 @@ class CruiseController extends Controller
         $schedule->delete();
         return response()->json(['message' => 'Расписание успешно удалено']);
     }
-
 }
