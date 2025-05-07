@@ -18,11 +18,11 @@ return [
 
     'allowed_methods' => ['*'], // Можете указать конкретные методы, например, ['GET', 'POST', 'PUT', 'DELETE']
 
-    'allowed_origins' => ['http://localhost:3000'], // Адрес вашего фронтенда (например, http://localhost:3000 для Next.js)
+    'allowed_origins' => ['*'], // Адрес вашего фронтенда (например, http://localhost:3000 для Next.js)
 
     'allowed_headers' => ['*'], // Заголовки, которые разрешено отправлять
 
-    'exposed_headers' => ['Authorization'], // Заголовки, которые могут быть доступны на клиенте
+    'exposed_headers' => [], // Заголовки, которые могут быть доступны на клиенте
 
     'max_age' => 3600, // Время кэширования CORS в секундах
 
